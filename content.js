@@ -1,16 +1,19 @@
 function addSaveButton() {
-    const prompts = document.querySelectorAll('div[class*="bg-gray-800"] > .text-base > div:nth-child(2) > div:nth-child(1) > div');
-  
-    prompts.forEach((prompt) => {
-      if (!prompt.querySelector('.save-prompt-btn')) {
-        const saveButton = document.createElement('button');
-        saveButton.innerText = 'Save Prompt';
-        saveButton.classList.add('save-prompt-btn');
-        saveButton.addEventListener('click', () => savePrompt(prompt.innerText));
-        prompt.appendChild(saveButton);
-      }
-    });
-  }
+  const prompts = document.querySelectorAll('div[class*="bg-gray-800"] > .text-base > div:nth-child(2) > div:nth-child(1) > div');
+
+  prompts.forEach((prompt) => {
+    if (!prompt.querySelector('.save-prompt-btn')) {
+      // Store the original prompt text
+      const originalPromptText = prompt.innerText;
+
+      const saveButton = document.createElement('button');
+      saveButton.innerText = 'Save Prompt';
+      saveButton.classList.add('save-prompt-btn');
+      saveButton.addEventListener('click', () => savePrompt(originalPromptText));
+      prompt.appendChild(saveButton);
+    }
+  });
+}
   
   function savePrompt(promptText) {
     if (promptText) {
