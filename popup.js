@@ -24,19 +24,30 @@ chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
           const promptItem = document.createElement('li');
           promptItem.classList.add('prompt-item');
   
-          const promptText = document.createElement('span');
-          promptText.classList.add('prompt-text');
-          promptText.innerText = prompt;
-          promptText.addEventListener('click', () => {
-            pastePromptToTextarea(prompt);
-          });
+          const promptTextArea = document.createElement('textarea');
+            promptTextArea.classList.add('prompt-text');
+            promptTextArea.value = prompt;
+            promptTextArea.addEventListener('blur', () => {
+              pastePromptToTextarea(promptTextArea.value);
+            });
+
+            const saveButton = document.createElement('button');
+            saveButton.classList.add('save-button');
+            saveButton.innerText = 'Save';
+            saveButton.addEventListener('click', () => {
+              updatePrompt(index, promptTextArea.value);
+            });
+
+            // Create a container div for the Save and Delete buttons
+            const buttonsContainer = document.createElement('div');
+            buttonsContainer.classList.add('buttons-container');
 
            // Truncate any prompt longer than 200 characters
             const truncatedPrompt = prompt.length > 200 ? prompt.substring(0, 200) + '...' : prompt;
 
-            promptText.innerText = truncatedPrompt;
-            promptText.title = prompt; // Add the full prompt text as a tooltip
-            promptText.addEventListener('click', () => {
+            promptTextArea.innerText = truncatedPrompt;
+            promptTextArea.title = prompt; // Add the full prompt text as a tooltip
+            promptTextArea.addEventListener('click', () => {
                 pastePromptToTextarea(prompt);
             });
   
@@ -46,11 +57,16 @@ chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
           deleteButton.addEventListener('click', () => {
             deletePrompt(index);
           });
+
+            // Add the Save and Delete buttons to the container div
+          buttonsContainer.appendChild(saveButton);
+          buttonsContainer.appendChild(deleteButton);
   
-          promptItem.appendChild(promptText);
-          promptItem.appendChild(deleteButton);
+          promptItem.appendChild(promptTextArea);
+          promptItem.appendChild(buttonsContainer);
           savedPromptsList.appendChild(promptItem);
         });
+      
   
         container.appendChild(savedPromptsList);
       } else {
@@ -66,6 +82,23 @@ chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
     // Send message to the content script to paste the prompt
     chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
       chrome.tabs.sendMessage(tabs[0].id, { action: 'pastePrompt', promptText: promptText });
+    });
+  }
+
+  function updatePrompt(promptIndex, newPromptText) {
+    chrome.storage.local.get(['savedPrompts'], function (result) {
+      if (result.savedPrompts && result.savedPrompts.length > 0) {
+        // Update the prompt text in the saved prompts array
+        result.savedPrompts[promptIndex] = newPromptText;
+  
+        // Save the updated prompts array back to the local storage
+        chrome.storage.local.set({ 'savedPrompts': result.savedPrompts }, function () {
+          // Refresh the list of prompts in the popup UI
+          pastePrompt();
+        });
+      } else {
+        alert('No saved prompts found. Please save prompts first.');
+      }
     });
   }
 

@@ -9,15 +9,18 @@ body {
     height: 100px;
     margin-bottom: 16px;
     resize: none;
+    word-break: break-all;
+    word-wrap: break-word;
   }
   
   button {
-    width: 48%;
+    width: 100%;
     margin-right: 4%;
     background-color: #1a73e8;
     color: white;
     border: none;
-    padding: 8px 0;
+    border-radius: 4px;
+    padding: 5px 10px; 
     cursor: pointer;
   }
   
@@ -40,6 +43,7 @@ body {
     justify-content: space-between;
     align-items: center;
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
+    flex-direction: column; 
   }
   
   .prompt-text {
@@ -63,12 +67,19 @@ body {
 /* Truncate any prompt longer than 200 characters */
 .prompt-text {
   display: block;
-  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 250px; /* Adjust the maximum width based on your preference */
 }
 
+/* Add the following styles for buttons container */
+.buttons-container {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px;
+}
+
+/* extremely frivilous styles */
 @property --rotate {
   syntax: "<angle>";
   initial-value: 132deg;
