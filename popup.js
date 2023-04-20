@@ -10,71 +10,54 @@ chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
     // Rest of the popup.js code remains the same
   });
 
+  function displayPrompts(prompts) {
+    const container = document.getElementById('popup-content');
+    container.innerHTML = '';
+  
+    if (prompts && prompts.length > 0) {
+      prompts.forEach(function (prompt, index) {
+        const promptWrapper = document.createElement('div');
+        promptWrapper.classList.add('prompt-wrapper');
+  
+        const promptText = document.createElement('textarea');
+        promptText.value = prompt;
+        promptText.readOnly = true;
+        promptText.wrap = 'hard';
+        promptText.rows = 3;
+  
+        const buttonsWrapper = document.createElement('div');
+        buttonsWrapper.style.display = 'flex';
+        buttonsWrapper.style.justifyContent = 'space-between';
+  
+        const saveBtn = document.createElement('button');
+        saveBtn.innerText = 'Save Prompt';
+        saveBtn.onclick = function () {
+          savePrompt(prompt);
+        };
+  
+        const deleteBtn = document.createElement('button');
+        deleteBtn.innerText = 'Delete';
+        deleteBtn.onclick = function () {
+          deletePrompt(index);
+        };
+  
+        buttonsWrapper.appendChild(saveBtn);
+        buttonsWrapper.appendChild(deleteBtn);
+        promptWrapper.appendChild(promptText);
+        promptWrapper.appendChild(buttonsWrapper);
+        container.appendChild(promptWrapper);
+      });
+    } else {
+      // Display a message when there are no saved prompts
+      const noPromptsMessage = document.createElement('p');
+      noPromptsMessage.innerText = "It looks like you don't have any prompts saved. Try saving a prompt to get started!";
+      container.appendChild(noPromptsMessage);
+    }
+  }
+  
   function pastePrompt() {
     chrome.storage.local.get(['savedPrompts'], function (result) {
-      const container = document.getElementById('popup-content');
-      container.innerHTML = '';
-  
-      if (result.savedPrompts && result.savedPrompts.length > 0) {
-        // Create a list of saved prompts in the popup UI
-        const savedPromptsList = document.createElement('ul');
-        savedPromptsList.classList.add('saved-prompts-list');
-  
-        result.savedPrompts.forEach((prompt, index) => {
-          const promptItem = document.createElement('li');
-          promptItem.classList.add('prompt-item');
-  
-          const promptTextArea = document.createElement('textarea');
-            promptTextArea.classList.add('prompt-text');
-            promptTextArea.value = prompt;
-            promptTextArea.addEventListener('blur', () => {
-              pastePromptToTextarea(promptTextArea.value);
-            });
-
-            const saveButton = document.createElement('button');
-            saveButton.classList.add('save-button');
-            saveButton.innerText = 'Save';
-            saveButton.addEventListener('click', () => {
-              updatePrompt(index, promptTextArea.value);
-            });
-
-            // Create a container div for the Save and Delete buttons
-            const buttonsContainer = document.createElement('div');
-            buttonsContainer.classList.add('buttons-container');
-
-           // Truncate any prompt longer than 200 characters
-            const truncatedPrompt = prompt.length > 200 ? prompt.substring(0, 200) + '...' : prompt;
-
-            promptTextArea.innerText = truncatedPrompt;
-            promptTextArea.title = prompt; // Add the full prompt text as a tooltip
-            promptTextArea.addEventListener('click', () => {
-                pastePromptToTextarea(prompt);
-            });
-  
-          const deleteButton = document.createElement('button');
-          deleteButton.classList.add('delete-button');
-          deleteButton.innerText = 'Delete';
-          deleteButton.addEventListener('click', () => {
-            deletePrompt(index);
-          });
-
-            // Add the Save and Delete buttons to the container div
-          buttonsContainer.appendChild(saveButton);
-          buttonsContainer.appendChild(deleteButton);
-  
-          promptItem.appendChild(promptTextArea);
-          promptItem.appendChild(buttonsContainer);
-          savedPromptsList.appendChild(promptItem);
-        });
-      
-  
-        container.appendChild(savedPromptsList);
-      } else {
-        // Display a message when there are no saved prompts
-        const noPromptsMessage = document.createElement('p');
-        noPromptsMessage.innerText = "It looks like you don't have any prompts saved. Try saving a prompt to get started!";
-        container.appendChild(noPromptsMessage);
-      }
+      displayPrompts(result.savedPrompts);
     });
   }
   
@@ -118,6 +101,51 @@ chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
       }
     });
   }
+
+  // Function for search prompt
+  function searchPrompts(searchQuery) {
+    chrome.storage.local.get(['savedPrompts'], function (result) {
+      const container = document.getElementById('popup-content');
+      container.innerHTML = '';
+  
+      if (result.savedPrompts && result.savedPrompts.length > 0) {
+        const filteredPrompts = result.savedPrompts.filter(prompt =>
+          prompt.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+  
+        if (filteredPrompts.length > 0) {
+          displayPrompts(filteredPrompts);
+        } else {
+          const noResultsMessage = document.createElement('p');
+          noResultsMessage.innerText = 'No results found for your search query.';
+          container.appendChild(noResultsMessage);
+        }
+      } else {
+        const noPromptsMessage = document.createElement('p');
+        noPromptsMessage.innerText = "It looks like you don't have any prompts saved. Try saving a prompt to get started!";
+        container.appendChild(noPromptsMessage);
+      }
+    });
+  }
+// Made the search function work
+function searchPrompts() {
+  const searchTerm = document.getElementById('search-box').value.toLowerCase();
+
+  chrome.storage.local.get(['savedPrompts'], function (result) {
+    const savedPrompts = result.savedPrompts || [];
+
+    // Filter the prompts based on the search term
+    const filteredPrompts = savedPrompts.filter(prompt =>
+      prompt.toLowerCase().includes(searchTerm)
+    );
+
+    displayPrompts(filteredPrompts);
+  });
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+  document.getElementById('search-button').addEventListener('click', searchPrompts);
+});
   
   document.addEventListener('DOMContentLoaded', function () {
     pastePrompt();
