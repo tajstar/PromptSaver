@@ -223,11 +223,98 @@ document.addEventListener('DOMContentLoaded', function () {
    });
 });
 
-
-  
   document.addEventListener('DOMContentLoaded', function () {
     pastePrompt();
   });
 
+  // popup window
+  document.getElementById("openPopup").addEventListener("click", function () {
+    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+      chrome.tabs.executeScript(tabs[0].id, {
+        code: '(' + createPopupIframe.toString() + ')();',
+      });
+    });
+  });
+  
+  function createPopupIframe() {
+    // Create a container for the iframe
+    const container = document.createElement('div');
+    container.className = 'draggable';
+    
+  // Create the drag handle
+  const dragHandle = document.createElement('div');
+  dragHandle.className = 'drag-handle';
+  container.appendChild(dragHandle);
+  
+    const iframe = document.createElement("iframe");
+    iframe.src = "chrome-extension://niaolmfjmefbfapphdljolpgnjhdlido/popup.html";
+    //iframe.src = chrome.runtime.getURL("popup.html");
+    iframe.style.width = "300px";
+    iframe.style.height = "400px";
+    iframe.style.position = "fixed";
+    iframe.style.top = "10px";
+    iframe.style.right = "10px";
+    iframe.style.zIndex = "10000";
+    iframe.style.border = "1px solid #ccc";
+    iframe.style.borderRadius = "4px";
+    iframe.style.backgroundColor = "#ffffff";
+    container.appendChild(iframe);
+    document.body.appendChild(container);
+    
+// Draggable functionality
+let active = false;
+let currentX;
+let currentY;
+let initialX;
+let initialY;
+let xOffset = 0;
+let yOffset = 0;
 
+dragHandle.addEventListener('mousedown', (e) => {
+  initialX = e.clientX - xOffset;
+  initialY = e.clientY - yOffset;
+  active = true;
+  // Disable pointer events on iframe and other elements
+  document.body.style.pointerEvents = 'none';
+});
 
+document.addEventListener('mousemove', (e) => {
+  if (active) {
+    e.preventDefault();
+    currentX = e.clientX - initialX;
+    currentY = e.clientY - initialY;
+    xOffset = currentX;
+    yOffset = currentY;
+    container.style.transform = `translate3d(${currentX}px, ${currentY}px, 0)`;
+  }
+});
+
+document.addEventListener('mouseup', () => {
+  initialX = currentX;
+  initialY = currentY;
+  active = false;
+  // Re-enable pointer events on iframe and other elements
+  document.body.style.pointerEvents = '';
+});
+
+// Add styles for the draggable container and drag handle
+const style = document.createElement('style');
+style.innerHTML = `
+.draggable {
+  position: absolute;
+  cursor: move;
+  z-index: 1000;
+}
+.drag-handle {
+  background-color: #ccc;
+  width: 100%;
+  height: 20px;
+  cursor: move;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+}
+`;
+document.head.appendChild(style);
+}
