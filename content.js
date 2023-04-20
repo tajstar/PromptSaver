@@ -39,7 +39,6 @@ function addSaveButton() {
   }
 
   chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
-    console.log("Message received in content.js:", request);
     if (request.action === 'pastePrompt') {
       const textArea = document.querySelector('textarea[data-id]:not([data-id=""])');
       if (textArea) {
