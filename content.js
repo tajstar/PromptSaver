@@ -68,3 +68,26 @@ chrome.runtime.onConnect.addListener(function (port) {
   });
   
   setInterval(addSaveButton, 100);
+
+  chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
+    if (request.action === "createPopupIframe") {
+      createPopupIframe();
+    }
+  });
+  
+  function createPopupIframe() {
+    const iframe = document.createElement("iframe");
+    iframe.src = chrome.runtime.getURL("popup.html");
+    iframe.style.width = "300px";
+    iframe.style.height = "400px";
+    iframe.style.position = "fixed";
+    iframe.style.top = "10px";
+    iframe.style.right = "10px";
+    iframe.style.zIndex = "10000";
+    iframe.style.border = "1px solid #ccc";
+    iframe.style.borderRadius = "4px";
+    iframe.style.backgroundColor = "#ffffff";
+    document.body.appendChild(iframe);
+  }
+
+  

@@ -14,8 +14,11 @@
   "permissions": [
     "clipboardWrite",
     "storage",
-    "https://chat.openai.com/*"
+    "activeTab",
+    "tabs",
+    "<all_urls>"
   ],
+  "web_accessible_resources": ["popup.html"],
   "content_scripts": [
     {
       "matches": ["https://chat.openai.com/*"],
