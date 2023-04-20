@@ -145,7 +145,17 @@ function searchPrompts() {
 
 document.addEventListener('DOMContentLoaded', function () {
   document.getElementById('search-button').addEventListener('click', searchPrompts);
+   // Add a keyup event listener to the search input field
+   const searchInput = document.getElementById('search-box');
+   searchInput.addEventListener('keyup', function (event) {
+     // Check if the "Enter" key was pressed
+     if (event.key === 'Enter') {
+       searchPrompts();
+     }
+   });
 });
+
+
   
   document.addEventListener('DOMContentLoaded', function () {
     pastePrompt();
